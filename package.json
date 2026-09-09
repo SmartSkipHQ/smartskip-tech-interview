@@ -1,0 +1,26 @@
+{
+  "name": "smartskip-tech-interview",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Take-home style exercise: a skip hire dispatch board that combines CRUD, third-party data and an AI summary layer.",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm run dev --workspace @smartskip/api",
+    "dev:web": "npm run dev --workspace @smartskip/web",
+    "build": "npm run build --workspace @smartskip/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "typescript": "~5.9"
+  }
+}

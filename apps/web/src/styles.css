@@ -1,0 +1,279 @@
+:root {
+  --bg: #0f1115;
+  --surface: #171a21;
+  --surface-raised: #1e222b;
+  --border: #2a2f3a;
+  --text: #e6e8ec;
+  --text-muted: #9aa1ad;
+  --accent: #4ea8de;
+  --warning: #e0a33e;
+  --critical: #e0574a;
+  --ok: #4caf82;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.25;
+}
+
+code {
+  font-family: ui-monospace, 'Cascadia Code', Menlo, monospace;
+  font-size: 0.9em;
+  color: var(--accent);
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.app__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.app__subtitle {
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+}
+
+.app__date {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.app__date input {
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: normal;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.app__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 880px) {
+  .app__grid {
+    grid-template-columns: 1.15fr 1fr;
+  }
+}
+
+.app__column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.panel {
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.panel--placeholder {
+  border-style: dashed;
+}
+
+.panel__header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.panel__header h2 {
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+.panel__count {
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--surface-raised);
+  border-radius: 999px;
+}
+
+.panel__state {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.panel__state--error {
+  color: var(--critical);
+}
+
+.button {
+  padding: 0.35rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.button:disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.job-card {
+  padding: 0.9rem 1rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.job-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.job-card__time {
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.job-card__title {
+  font-size: 1rem;
+}
+
+.job-card__address {
+  margin: 0.15rem 0 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.job-card__meta {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.job-card__notes {
+  margin: 0.6rem 0 0;
+  padding-top: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+
+.badge {
+  padding: 0.1rem 0.5rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+
+.badge--scheduled {
+  color: var(--accent);
+}
+
+.badge--in_progress {
+  color: var(--warning);
+}
+
+.badge--completed {
+  color: var(--ok);
+}
+
+.badge--cancelled {
+  color: var(--text-muted);
+}
+
+.briefing__headline {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+.briefing__items {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.briefing__item {
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+  background: var(--surface-raised);
+  border-left: 3px solid var(--text-muted);
+  border-radius: 0 6px 6px 0;
+}
+
+.briefing__item--warning {
+  border-left-color: var(--warning);
+}
+
+.briefing__item--critical {
+  border-left-color: var(--critical);
+}
+
+.briefing__source {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
