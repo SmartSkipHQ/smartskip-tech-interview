@@ -1,97 +1,144 @@
 /**
  * Types shared by the API and the web app. Both workspaces import this package,
  * so a change here is immediately visible on both sides of the wire.
+ *
+ * All data in this exercise is synthetic. Never load real consumer data into it.
  */
-
-export type JobType = 'delivery' | 'collection' | 'exchange'
-
-export type JobStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
-
-/** Skip capacity in cubic yards. */
-export type SkipSize = 4 | 6 | 8 | 12 | 16
 
 export interface Coordinates {
   lat: number
   lon: number
 }
 
-export interface Job {
+export interface PostalAddress {
+  line1: string
+  city: string
+  /** Two letter US state code. */
+  state: string
+  postalCode: string
+}
+
+/** How far along we are on a given subject. */
+export type SubjectStatus = 'new' | 'searching' | 'resolved' | 'cold'
+
+/** The person we are trying to locate. */
+export interface SearchSubject {
   id: string
-  /** Human friendly reference shown to customers, e.g. "SS-1042". */
+  /** Case reference shown to the client, e.g. "SK-2041". */
   reference: string
-  customerName: string
-  address: string
-  location: Coordinates
-  /** ISO 8601 timestamp of the booked slot. */
-  scheduledFor: string
-  type: JobType
-  status: JobStatus
-  skipSize: SkipSize
+  fullName: string
+  /** Last phone number the client had for them, E.164-ish. */
+  knownPhone?: string
+  lastKnownAddress?: PostalAddress
+  status: SubjectStatus
+  openedAt: string
   notes?: string
   createdAt: string
   updatedAt: string
 }
 
-/** Fields a client may send when creating a job. */
-export interface CreateJobInput {
-  customerName: string
-  address: string
-  location: Coordinates
-  scheduledFor: string
-  type: JobType
-  skipSize: SkipSize
-  status?: JobStatus
+export interface CreateSubjectInput {
+  fullName: string
+  knownPhone?: string
+  lastKnownAddress?: PostalAddress
+  status?: SubjectStatus
   notes?: string
 }
 
-/** Every field is optional on update; only what is sent gets changed. */
-export type UpdateJobInput = Partial<CreateJobInput>
+export type UpdateSubjectInput = Partial<CreateSubjectInput>
+
+/** Which vendor a record came from. Mirrors the real providers we buy from. */
+export type RecordSource = 'idi' | 'public_records' | 'telco'
+
+export type LineType = 'mobile' | 'landline' | 'voip' | 'unknown'
+
+export interface PhoneRecord {
+  number: string
+  lineType: LineType
+  carrier?: string
+  /** `null` means nobody has checked, which is not the same as "disconnected". */
+  active: boolean | null
+  /** ISO date the vendor last saw activity on this line. */
+  lastSeen?: string
+}
+
+export type RelationKind = 'parent' | 'sibling' | 'spouse' | 'child' | 'associate'
+
+export interface Relationship {
+  fullName: string
+  relation: RelationKind
+  age?: number
+}
 
 /**
- * Weather for the hours around a job, normalised so the UI never has to know
- * which provider it came from.
+ * One candidate match, exactly as a vendor reported it. Vendors disagree with
+ * each other constantly; that disagreement is the whole problem.
  */
-export interface JobForecast {
-  jobId: string
-  /** ISO timestamp the forecast refers to. */
-  observedFor: string
-  temperatureC: number
-  precipitationMm: number
-  windSpeedKph: number
-  /** Short human readable label, e.g. "Heavy rain". */
-  summary: string
+export interface SearchRecord {
+  id: string
+  subjectId: string
+  source: RecordSource
+  fullName: string
+  age?: number
+  address?: PostalAddress
+  phones: PhoneRecord[]
+  relatives: Relationship[]
+  /** ISO date the vendor says this information was current. */
+  reportedAt: string
+  /** Filled in by the geo enrichment step, absent until then. */
+  coordinates?: Coordinates
+  /** Straight-line km from the subject's last known address, once enriched. */
+  distanceFromLastKnownKm?: number
 }
 
-/** One leg of the planned round trip, depot -> job -> job -> ... -> depot. */
-export interface RouteLeg {
-  fromJobId: string | null
-  toJobId: string | null
-  distanceKm: number
-  durationMin: number
+/**
+ * A vendor call either returns records or fails. Modelling the failure per
+ * source means one bad vendor does not sink the whole search.
+ */
+export interface SourceResult {
+  source: RecordSource
+  records: SearchRecord[]
+  error?: string
+  /** Round trip time in ms, handy when you start worrying about latency. */
+  elapsedMs: number
 }
 
-export interface RoutePlan {
-  /** Job ids in the order they should be visited. */
-  order: string[]
-  legs: RouteLeg[]
-  totalDistanceKm: number
-  totalDurationMin: number
-}
+export type IdentityFlagCode =
+  | 'stale_address'
+  | 'disconnected_phone'
+  | 'possible_namesake'
+  | 'distant_match'
+  | 'thin_data'
 
-export type BriefingSeverity = 'info' | 'warning' | 'critical'
+export type FlagSeverity = 'info' | 'warning' | 'critical'
 
-export interface BriefingItem {
-  jobId: string
-  severity: BriefingSeverity
-  /** One sentence a dispatcher can act on. */
+export interface IdentityFlag {
+  code: IdentityFlagCode
+  severity: FlagSeverity
   message: string
 }
 
-export interface DayBriefing {
-  /** ISO date the briefing covers, e.g. "2026-09-10". */
-  date: string
-  headline: string
-  items: BriefingItem[]
+/**
+ * A cluster of records the resolver believes describe one human being, with a
+ * reason a investigator can argue with.
+ */
+export interface ResolvedIdentity {
+  /** Short label, e.g. "Primary match" or "Possible namesake". */
+  label: string
+  /** 0-100. Be honest rather than confident. */
+  confidence: number
+  recordIds: string[]
+  bestAddress?: PostalAddress
+  bestPhone?: string
+  flags: IdentityFlag[]
+  /** One paragraph explaining the call, in plain English. */
+  rationale: string
+}
+
+export interface Resolution {
+  subjectId: string
+  /** Sorted by confidence, best first. */
+  identities: ResolvedIdentity[]
   generatedAt: string
   /** Which implementation produced this, useful while developing. */
   source: 'mock' | 'anthropic'
@@ -102,16 +149,22 @@ export interface ApiError {
   details?: unknown
 }
 
-/** The yard every round trip starts and ends at. */
-export const DEPOT: Coordinates = { lat: 53.4808, lon: -2.2426 }
-
-export const JOB_TYPES: readonly JobType[] = ['delivery', 'collection', 'exchange']
-
-export const JOB_STATUSES: readonly JobStatus[] = [
-  'scheduled',
-  'in_progress',
-  'completed',
-  'cancelled',
+export const SUBJECT_STATUSES: readonly SubjectStatus[] = [
+  'new',
+  'searching',
+  'resolved',
+  'cold',
 ]
 
-export const SKIP_SIZES: readonly SkipSize[] = [4, 6, 8, 12, 16]
+export const RECORD_SOURCES: readonly RecordSource[] = ['idi', 'public_records', 'telco']
+
+/** Vendor slugs are not presentable, so keep the labels next to them. */
+export const SOURCE_LABELS: Record<RecordSource, string> = {
+  idi: 'IDI',
+  public_records: 'Public records',
+  telco: 'Telco',
+}
+
+export function formatAddress(address: PostalAddress): string {
+  return `${address.line1}, ${address.city}, ${address.state} ${address.postalCode}`
+}

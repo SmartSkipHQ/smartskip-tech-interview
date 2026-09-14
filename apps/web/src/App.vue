@@ -1,43 +1,68 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import BriefingPanel from '@/components/BriefingPanel.vue'
-import JobForm from '@/components/JobForm.vue'
-import JobList from '@/components/JobList.vue'
-import { useJobs } from '@/composables/useJobs'
+import { formatAddress } from '@smartskip/shared'
+import ResolutionPanel from '@/components/ResolutionPanel.vue'
+import SourcePanel from '@/components/SourcePanel.vue'
+import SubjectForm from '@/components/SubjectForm.vue'
+import SubjectList from '@/components/SubjectList.vue'
+import { useSubjects } from '@/composables/useSubjects'
 
-const { jobs, loading, error, refresh } = useJobs()
+const { subjects, loading, error, refresh } = useSubjects()
 
-const date = ref(new Date().toISOString().slice(0, 10))
+const selectedId = ref<string | null>(null)
 
-const jobsForDate = computed(() =>
-  jobs.value.filter((job) => job.scheduledFor.startsWith(date.value)),
+const selected = computed(
+  () => subjects.value.find((subject) => subject.id === selectedId.value) ?? null,
 )
 
-onMounted(refresh)
+onMounted(async () => {
+  await refresh()
+
+  // Open on the case actually being worked, not the newest empty one.
+  const active = subjects.value.find((subject) => subject.status === 'searching')
+  selectedId.value = active?.id ?? subjects.value[0]?.id ?? null
+})
 </script>
 
 <template>
   <div class="app">
     <header class="app__header">
       <div>
-        <h1>SmartSkip Dispatch</h1>
-        <p class="app__subtitle">Skip deliveries and collections for one depot.</p>
+        <h1>SmartSkip Trace</h1>
+        <p class="app__subtitle">
+          Find the person behind a phone number, across sources that disagree.
+        </p>
       </div>
 
-      <label class="app__date">
-        <span>Day</span>
-        <input v-model="date" type="date" />
-      </label>
+      <div v-if="selected" class="subject-summary">
+        <span class="subject-summary__name">{{ selected.fullName }}</span>
+        <span class="subject-summary__meta">
+          {{ selected.knownPhone ?? 'no number on file' }}
+          <template v-if="selected.lastKnownAddress">
+            · last known at {{ formatAddress(selected.lastKnownAddress) }}
+          </template>
+        </span>
+      </div>
     </header>
 
     <main class="app__grid">
       <div class="app__column">
-        <JobList :jobs="jobsForDate" :loading="loading" :error="error" />
+        <SubjectList
+          :subjects="subjects"
+          :selected-id="selectedId"
+          :loading="loading"
+          :error="error"
+          @select="selectedId = $event"
+        />
+        <SubjectForm />
       </div>
 
       <div class="app__column">
-        <BriefingPanel :date="date" />
-        <JobForm />
+        <SourcePanel v-if="selectedId" :subject-id="selectedId" />
+      </div>
+
+      <div class="app__column">
+        <ResolutionPanel v-if="selectedId" :subject-id="selectedId" />
       </div>
     </main>
   </div>

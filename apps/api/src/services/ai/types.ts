@@ -1,14 +1,14 @@
-import type { DayBriefing, Job, JobForecast, RoutePlan } from '@smartskip/shared'
+import type { Resolution, SearchRecord, SearchSubject, SourceResult } from '@smartskip/shared'
 
-/** Everything the briefing layer is allowed to reason about. */
-export interface BriefingContext {
-  /** ISO date, e.g. "2026-09-10". */
-  date: string
-  jobs: Job[]
-  forecasts: JobForecast[]
-  route: RoutePlan
+/** Everything the resolver is allowed to reason about. */
+export interface ResolutionContext {
+  subject: SearchSubject
+  /** Every record from every source that answered, already enriched. */
+  records: SearchRecord[]
+  /** Per-source outcome, including the ones that failed. */
+  sources: SourceResult[]
 }
 
-export interface BriefingGenerator {
-  generate(context: BriefingContext): Promise<DayBriefing>
+export interface IdentityResolver {
+  resolve(context: ResolutionContext): Promise<Resolution>
 }
