@@ -1,69 +1,26 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { formatAddress } from '@smartskip/shared'
-import ResolutionPanel from '@/components/ResolutionPanel.vue'
-import SourcePanel from '@/components/SourcePanel.vue'
-import SubjectForm from '@/components/SubjectForm.vue'
-import SubjectList from '@/components/SubjectList.vue'
-import { useSubjects } from '@/composables/useSubjects'
+import { onMounted } from 'vue'
+import PlanForm from '@/components/PlanForm.vue'
+import PlanList from '@/components/PlanList.vue'
+import { usePlans } from '@/composables/usePlans'
 
-const { subjects, loading, error, refresh } = useSubjects()
+const { plans, loading, error, refresh } = usePlans()
 
-const selectedId = ref<string | null>(null)
-
-const selected = computed(
-  () => subjects.value.find((subject) => subject.id === selectedId.value) ?? null,
-)
-
-onMounted(async () => {
-  await refresh()
-
-  // Open on the case actually being worked, not the newest empty one.
-  const active = subjects.value.find((subject) => subject.status === 'searching')
-  selectedId.value = active?.id ?? subjects.value[0]?.id ?? null
-})
+onMounted(refresh)
 </script>
 
 <template>
   <div class="app">
     <header class="app__header">
-      <div>
-        <h1>SmartSkip Trace</h1>
-        <p class="app__subtitle">
-          Find the person behind a phone number, across sources that disagree.
-        </p>
-      </div>
-
-      <div v-if="selected" class="subject-summary">
-        <span class="subject-summary__name">{{ selected.fullName }}</span>
-        <span class="subject-summary__meta">
-          {{ selected.knownPhone ?? 'no number on file' }}
-          <template v-if="selected.lastKnownAddress">
-            · last known at {{ formatAddress(selected.lastKnownAddress) }}
-          </template>
-        </span>
-      </div>
+      <h1>Is it a good day for that?</h1>
+      <p class="app__subtitle">
+        Your plans, the weather where they happen, and whether to go ahead.
+      </p>
     </header>
 
     <main class="app__grid">
-      <div class="app__column">
-        <SubjectList
-          :subjects="subjects"
-          :selected-id="selectedId"
-          :loading="loading"
-          :error="error"
-          @select="selectedId = $event"
-        />
-        <SubjectForm />
-      </div>
-
-      <div class="app__column">
-        <SourcePanel v-if="selectedId" :subject-id="selectedId" />
-      </div>
-
-      <div class="app__column">
-        <ResolutionPanel v-if="selectedId" :subject-id="selectedId" />
-      </div>
+      <PlanList :plans="plans" :loading="loading" :error="error" />
+      <PlanForm />
     </main>
   </div>
 </template>

@@ -1,27 +1,14 @@
 # SmartSkip technical interview
 
-A stripped-down skip trace tool. It already runs; most of it is not built yet.
+A small app that looks at what you have planned, checks the weather where it happens, and tells
+you whether to go ahead. It already runs; most of it is not built yet.
 
 We use this repo for the technical part of the interview. You will work in it live with one of
 us for about 90 minutes. Nothing here is a trick question and there is no hidden test suite
 scoring you — we want to see how you actually work.
 
-**Before the session:** clone the repo, run `npm install`, run `npm run dev`, and confirm you can
-see the Marcus Webb case in the browser. That's it. Please don't start on the tasks beforehand.
-
-## The problem
-
-Skip tracing is finding someone who stopped being findable. You start with a name and a phone
-number that no longer works, and you buy data about them from several vendors.
-
-The vendors disagree. Open the app and look at the Marcus Webb case: one source has him in
-Phoenix on a landline that's been dead for two years, another has him in Tucson, a third has an
-active mobile in Tucson under the name "M. Webb", and a fourth has a Marcus Webb in Dallas who is
-twenty-two years older and married to someone else. Three of those are one man who moved. One is
-a stranger who happens to share a name.
-
-Sorting that out is the job. Today the app does it by grouping on surname, which is exactly as
-bad as it sounds.
+**Before the session:** clone the repo, run `npm install`, run `npm run dev`, and confirm you see
+five plans in the browser. That's it. Please don't start on the tasks beforehand.
 
 ## Running it
 
@@ -48,55 +35,50 @@ npm run dev
 ## What's in the box
 
 ```
-apps/api        Express + TypeScript. In-memory store, seeded with four cases.
+apps/api        Express + TypeScript. In-memory store, seeded with five plans.
 apps/web        Vue 3 + Vite + TypeScript.
 packages/shared Types both sides import. Start here to get your bearings.
 ```
 
-The domain is four types. A `SearchSubject` is the person we're looking for. A `SearchRecord` is
-one candidate match as a single vendor reported it, carrying `PhoneRecord`s and `Relationship`s.
-A `Resolution` is what we think it all adds up to.
+The whole domain is three types. A `Plan` is a title, a city and a day. A `Forecast` is the
+weather for that city on that day. An `Advice` is a verdict — go, maybe, reschedule — with one
+sentence of reasoning.
 
 Already working:
 
-- `GET /api/subjects` (optional `?status=`) and `GET /api/subjects/:id`
-- `GET /api/subjects/:id/records`, the raw vendor output including per-source failures
-- `GET /api/subjects/:id/resolution`, backed by a deliberately naive rule-based resolver
-- The three-column UI, error handling, an async route wrapper, and tests on the store
-
-`src/services/vendors.ts` stands in for the paid providers we buy from. We can't hand out live
-vendor credentials, so it reads a fixture, takes a realistic moment to answer, and fails for one
-subject on purpose. Treat it as a network call you don't control.
+- `GET /api/plans` and `GET /api/plans/:id`
+- `GET /api/plans/:id/advice`, which returns the plan, its forecast and the verdict
+- The card list in the UI, error handling, an async route wrapper, and tests on the store
 
 Deliberately not working — every one of these is marked `TODO(candidate)`:
 
-- Creating, updating and deleting cases, on both sides of the wire
-- `src/services/geo.ts` returns the records untouched
-- `src/services/phoneLookup.ts` does nothing (optional, only if you have time)
-- `src/services/ai/anthropicResolver.ts` throws
+- Adding, editing and deleting plans, on both sides of the wire
+- `src/services/weather.ts` returns canned numbers instead of calling a weather API
+- `src/services/ai/anthropicAdvisor.ts` throws
 
 ## What we'd like you to build
 
 Roughly in this order, though it's your call:
 
-**1. CRUD.** Make cases openable, editable and deletable end to end. The store already supports
+**1. CRUD.** Make plans addable, editable and deletable end to end. The store already supports
 it; the routes, the client and the UI don't.
 
-**2. Put the records on a map.** Geocode the addresses the vendors returned and work out how far
-each one is from the subject's last known address. That distance is real signal — a match three
-states away is usually a namesake. Two free providers that need no API key are named in the
-comments in `geo.ts`, along with the pitfalls worth thinking about. One of them has a usage
-requirement that will make your requests fail until you find it.
+**2. Real weather.** Replace the canned forecast with Open-Meteo, which is free and needs no API
+key. It's two calls — city name to coordinates, then coordinates to a daily forecast — and both
+URLs are written out in the comments in `weather.ts`, along with the pitfalls worth thinking
+about.
 
-**3. Resolve the identity properly.** Replace the surname-matching resolver with Claude, and get
-it to split the Dallas namesake out, score its confidence honestly, and explain itself in a
-paragraph an investigator would act on. `AI_PROVIDER=anthropic` switches implementations; we'll
-give you a temporary API key at the start of the session so you never need your own.
+**3. Better advice.** Open the app and look at the Chicago card: it's an indoor client meeting on
+the fourteenth floor, and the app tells you to move it because it's raining. Meanwhile the
+barbecue in 38°C heat gets a cheerful "go ahead". That's because the current advisor reads two
+numbers and never looks at what the plan actually *is*. Replace it with Claude and fix that.
+`AI_PROVIDER=anthropic` switches implementations; we'll give you a temporary API key at the start
+of the session so you never need your own.
 
-If all three land and there's time left, pick whatever you think the tool most needs. Surfacing
-the relatives as a graph, letting the user confirm or reject a match, caching vendor calls and
-moving the store behind a real database are all reasonable answers, and so is something we
-haven't thought of.
+If all three land and there's time left, pick whatever you think the app most needs. Suggesting a
+better day (the `suggestedDate` field is already there and never filled), showing the week around
+each plan, and caching the weather so five plans don't mean ten upstream calls are all reasonable
+answers, and so is something we haven't thought of.
 
 ## How we run the session
 
@@ -111,16 +93,11 @@ haven't thought of.
 ## What we pay attention to
 
 - Whether the code reads like the code already here, and whether someone else could pick it up.
-- What you do at the edges: a vendor is down, the geocoder rate limits you, the model returns
-  nonsense, the user sends a malformed body. Not every case needs handling, but we'll ask why you
-  handled the ones you did.
+- What you do at the edges: the weather API is down or rate limits you, the model returns
+  nonsense, the user types a city that doesn't exist, a plan is three weeks out and has no
+  forecast. Not every case needs handling, but we'll ask why you handled the ones you did.
 - Whether you check that the thing works, and how.
 - What you accept from an AI tool and what you push back on.
 - The questions you ask when the brief is vague. It's vague in places on purpose.
-
-## One house rule
-
-Every name, number and address in this repo is invented, and the phone numbers use the 555 range
-reserved for fiction. Don't put real people's data into it, not even your own.
 
 Questions before the session? Email whoever set it up with you. Good luck.

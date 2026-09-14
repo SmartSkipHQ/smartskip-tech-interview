@@ -13,13 +13,12 @@ Notes for coding agents, and for humans who want the conventions in one place.
 
 ## Domain
 
-A `SearchSubject` is a person we are trying to locate. Vendors return `SearchRecord`s about them,
-each carrying `PhoneRecord`s and `Relationship`s. Vendors contradict each other, so a
-`SearchRecord` is a claim, not a fact. A `Resolution` groups records into `ResolvedIdentity`
-clusters with a confidence score and a rationale.
+A `Plan` is a title, a city and a day. A `Forecast` is the weather for that city on that day. An
+`Advice` is a verdict of `go`, `maybe` or `reschedule` plus one sentence of reasoning. The card
+in the UI is a `PlanAdvice`, which is all three together.
 
-`src/services/vendors.ts` simulates the paid providers. It is the only place that fabricates
-data, and it is allowed to be slow and to fail.
+`Forecast.source` says where the numbers came from. It is `'sample'` until someone wires up a
+real provider, and the UI warns while it is.
 
 ## Conventions
 
@@ -30,16 +29,9 @@ data, and it is allowed to be slow and to fail.
   `src/services`.
 - Errors thrown as `HttpError` (`src/http/errors.ts`) become the response; anything else is a
   500. Async handlers must be wrapped in `asyncHandler`, since Express 4 swallows rejections.
-- A failing vendor is data, not an exception. Keep it in `SourceResult.error` and let the caller
-  decide what to show.
 - Vue components take props and emit events. Data fetching lives in a composable or in the
   component that owns the state, not deep in the tree.
 - Plain CSS in `src/styles.css` with BEM-ish class names. No UI framework.
-
-## Data
-
-Everything in `src/data` is synthetic and must stay that way. Phone numbers use the 555 range.
-Never add real consumer data to this repo.
 
 ## Checks
 

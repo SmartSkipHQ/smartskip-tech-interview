@@ -1,6 +1,6 @@
 import cors from 'cors'
 import express from 'express'
-import { subjectsRouter } from './routes/subjects'
+import { plansRouter } from './routes/plans'
 import { HttpError } from './http/errors'
 
 export function createApp() {
@@ -13,7 +13,7 @@ export function createApp() {
     res.json({ status: 'ok' })
   })
 
-  app.use('/api/subjects', subjectsRouter)
+  app.use('/api/plans', plansRouter)
 
   app.use((_req, res) => {
     res.status(404).json({ error: 'Not found' })

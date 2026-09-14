@@ -1,14 +1,13 @@
-import type { Resolution, SearchRecord, SearchSubject, SourceResult } from '@smartskip/shared'
+import type { Advice, Forecast, Plan } from '@smartskip/shared'
 
-/** Everything the resolver is allowed to reason about. */
-export interface ResolutionContext {
-  subject: SearchSubject
-  /** Every record from every source that answered, already enriched. */
-  records: SearchRecord[]
-  /** Per-source outcome, including the ones that failed. */
-  sources: SourceResult[]
+/** Everything the advisor is allowed to reason about. */
+export interface AdviceContext {
+  plan: Plan
+  forecast: Forecast
 }
 
-export interface IdentityResolver {
-  resolve(context: ResolutionContext): Promise<Resolution>
+export interface Advisor {
+  advise(context: AdviceContext): Promise<Advice>
 }
+
+export type { Advice }

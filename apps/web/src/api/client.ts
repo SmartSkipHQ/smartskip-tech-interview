@@ -1,10 +1,8 @@
 import type {
-  CreateSubjectInput,
-  Resolution,
-  SearchSubject,
-  SourceResult,
-  SubjectStatus,
-  UpdateSubjectInput,
+  CreatePlanInput,
+  Plan,
+  PlanAdvice,
+  UpdatePlanInput,
 } from '@smartskip/shared'
 
 export class ApiError extends Error {
@@ -33,35 +31,30 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  listSubjects(params: { status?: SubjectStatus } = {}): Promise<SearchSubject[]> {
-    const query = params.status ? `?status=${params.status}` : ''
-    return request<SearchSubject[]>(`/subjects${query}`)
+  listPlans(): Promise<Plan[]> {
+    return request<Plan[]>('/plans')
   },
 
-  getSubject(id: string): Promise<SearchSubject> {
-    return request<SearchSubject>(`/subjects/${id}`)
+  getPlan(id: string): Promise<Plan> {
+    return request<Plan>(`/plans/${id}`)
   },
 
-  /** TODO(candidate): POST /subjects */
-  createSubject(_input: CreateSubjectInput): Promise<SearchSubject> {
-    return Promise.reject(new Error('createSubject is not implemented yet'))
+  /** TODO(candidate): POST /plans */
+  createPlan(_input: CreatePlanInput): Promise<Plan> {
+    return Promise.reject(new Error('createPlan is not implemented yet'))
   },
 
-  /** TODO(candidate): PATCH /subjects/:id */
-  updateSubject(_id: string, _patch: UpdateSubjectInput): Promise<SearchSubject> {
-    return Promise.reject(new Error('updateSubject is not implemented yet'))
+  /** TODO(candidate): PATCH /plans/:id */
+  updatePlan(_id: string, _patch: UpdatePlanInput): Promise<Plan> {
+    return Promise.reject(new Error('updatePlan is not implemented yet'))
   },
 
-  /** TODO(candidate): DELETE /subjects/:id */
-  deleteSubject(_id: string): Promise<void> {
-    return Promise.reject(new Error('deleteSubject is not implemented yet'))
+  /** TODO(candidate): DELETE /plans/:id */
+  deletePlan(_id: string): Promise<void> {
+    return Promise.reject(new Error('deletePlan is not implemented yet'))
   },
 
-  getRecords(subjectId: string): Promise<SourceResult[]> {
-    return request<SourceResult[]>(`/subjects/${subjectId}/records`)
-  },
-
-  getResolution(subjectId: string): Promise<Resolution> {
-    return request<Resolution>(`/subjects/${subjectId}/resolution`)
+  getAdvice(planId: string): Promise<PlanAdvice> {
+    return request<PlanAdvice>(`/plans/${planId}/advice`)
   },
 }

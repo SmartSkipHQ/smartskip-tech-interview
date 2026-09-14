@@ -1,10 +1,10 @@
-import { anthropicResolver } from './anthropicResolver'
-import { mockResolver } from './mockResolver'
-import type { IdentityResolver } from './types'
+import { anthropicAdvisor } from './anthropicAdvisor'
+import { mockAdvisor } from './mockAdvisor'
+import type { Advisor } from './types'
 
-export type { IdentityResolver, ResolutionContext } from './types'
+export type { AdviceContext, Advisor } from './types'
 
 /** Chosen by AI_PROVIDER, defaulting to the offline implementation. */
-export function getIdentityResolver(): IdentityResolver {
-  return process.env.AI_PROVIDER === 'anthropic' ? anthropicResolver : mockResolver
+export function getAdvisor(): Advisor {
+  return process.env.AI_PROVIDER === 'anthropic' ? anthropicAdvisor : mockAdvisor
 }
