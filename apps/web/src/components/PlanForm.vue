@@ -1,9 +1,10 @@
 <script setup lang="ts">
 /**
- * TODO(candidate): this is where plans get added and edited.
+ * TODO(candidate): this is where plans get added.
  *
- * `api.createPlan` and `api.updatePlan` in `src/api/client.ts` are stubs, and
- * so are the matching routes in the API. Wire the whole path through.
+ * `api.createPlan` in `src/api/client.ts` is a stub and so is `POST /api/plans`.
+ * Wire the whole path through. Adding a plan is the only write operation in
+ * this exercise; editing and deleting are deliberately out of scope.
  *
  * Worth deciding as you go:
  *   - what does the user see while the request is in flight, and if it fails?
