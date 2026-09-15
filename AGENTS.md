@@ -17,8 +17,12 @@ A `Plan` is a title, a city and a day. A `Forecast` is the weather for that city
 `Advice` is a verdict of `go`, `maybe` or `reschedule` plus one sentence of reasoning. The card
 in the UI is a `PlanAdvice`, which is all three together.
 
-`Forecast.source` says where the numbers came from. It is `'sample'` until someone wires up a
-real provider, and the UI warns while it is.
+A plan with no forecast is a normal outcome, not an error. `src/services/weather` returns a
+`ForecastResult` that is either `ok` or a `reason` — `city_not_found`, `out_of_range`,
+`upstream_error` — and the card renders the reason. Two seeded plans hit this on every run.
+
+`WEATHER_MODE` is `live` (Open-Meteo) or `fixture` (one fixed day, no network). Tests use the
+fixture provider directly so they never depend on the weather.
 
 ## Conventions
 

@@ -28,6 +28,11 @@ import type { AdviceContext, Advisor } from './types'
  *   - `suggestedDate` is unused so far. Filling it means giving the model more
  *     than one day of forecast to choose from.
  *   - How would you test this without hitting the API on every run?
+ *     (`WEATHER_MODE=fixture` pins the weather, which is half the problem.)
+ *
+ * `GET /api/plans/:id/advice?provider=mock` and `?provider=anthropic` run the
+ * two implementations on the same plan, so you can show the advice improved
+ * rather than say it did.
  *
  * The reason is read by a person deciding what to do on Saturday, so it should
  * sound like a friend answering, not like a model hedging.

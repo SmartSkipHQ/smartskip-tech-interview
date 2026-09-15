@@ -1,17 +1,18 @@
 import { Router } from 'express'
+import type { PlanAdvice } from '@smartskip/shared'
 import { asyncHandler } from '../http/asyncHandler'
-import { notFound } from '../http/errors'
+import { badRequest, notFound } from '../http/errors'
 import { planStore } from '../store/planStore'
 import { fetchForecast } from '../services/weather'
-import { getAdvisor } from '../services/ai'
+import { getAdvisor, isAdvisorName } from '../services/ai'
 
 export const plansRouter: Router = Router()
 
 /**
  * GET /api/plans
  *
- * Reference implementation. The remaining handlers in this file follow the same
- * shape: validate input, talk to the store, return JSON.
+ * Reference implementation. The handler below it follows the same shape:
+ * validate input, talk to the store, return JSON.
  */
 plansRouter.get('/', (_req, res) => {
   res.json(planStore.list())
@@ -28,35 +29,27 @@ plansRouter.get('/:id', (req, res) => {
 /**
  * TODO(candidate): POST /api/plans
  *
- * Validate the body against `CreatePlanInput`, reject anything malformed with a
- * 400 that explains what is wrong, and return the created plan with a 201.
+ * The one write operation in this exercise. Validate the body against
+ * `CreatePlanInput`, reject anything malformed with a 400 that explains what is
+ * wrong, and return the created plan with a 201.
+ *
+ * `planStore.create` is already there and already works. The interesting part
+ * is deciding what counts as a valid plan: what happens to a date in the past,
+ * an empty title, a city that is three hundred characters of nonsense.
  */
 plansRouter.post('/', (_req, res) => {
   res.status(501).json({ error: 'Not implemented yet' })
 })
 
 /**
- * TODO(candidate): PATCH /api/plans/:id
+ * GET /api/plans/:id/advice?provider=mock|anthropic
  *
- * Partial update. Unknown ids should 404 rather than silently creating a plan.
- */
-plansRouter.patch('/:id', (_req, res) => {
-  res.status(501).json({ error: 'Not implemented yet' })
-})
-
-/**
- * TODO(candidate): DELETE /api/plans/:id
- */
-plansRouter.delete('/:id', (_req, res) => {
-  res.status(501).json({ error: 'Not implemented yet' })
-})
-
-/**
- * GET /api/plans/:id/advice
+ * The weather for that plan plus what to do about it, in one call so a card can
+ * draw itself. `provider` overrides AI_PROVIDER for this request, which is how
+ * you compare two implementations on the same plan.
  *
- * The weather for that plan plus what to do about it. One call so a card can
- * draw itself. Both halves behind it are stubs: see `src/services/weather.ts`
- * and `src/services/ai/`.
+ * A plan with no forecast is an ordinary outcome, not a 500. The response says
+ * so in `problem` and the card renders it.
  */
 plansRouter.get(
   '/:id/advice',
@@ -64,9 +57,30 @@ plansRouter.get(
     const plan = planStore.find(req.params.id)
     if (!plan) throw notFound(`No plan with id "${req.params.id}"`)
 
-    const forecast = await fetchForecast(plan)
-    const advice = await getAdvisor().advise({ plan, forecast })
+    const override = req.query.provider
+    if (override !== undefined && !isAdvisorName(override)) {
+      throw badRequest(`Unknown provider "${String(override)}"`, {
+        allowed: ['mock', 'anthropic'],
+      })
+    }
 
-    res.json({ plan, forecast, advice })
+    const result = await fetchForecast(plan)
+
+    if (!result.ok) {
+      const body: PlanAdvice = {
+        plan,
+        forecast: null,
+        advice: null,
+        problem: { reason: result.reason, detail: result.detail },
+      }
+
+      res.json(body)
+      return
+    }
+
+    const advice = await getAdvisor(override).advise({ plan, forecast: result.forecast })
+
+    const body: PlanAdvice = { plan, forecast: result.forecast, advice }
+    res.json(body)
   }),
 )

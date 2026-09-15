@@ -218,12 +218,18 @@ code {
   color: var(--text-muted);
 }
 
-.chip {
-  padding: 0.05rem 0.4rem;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.weather__where {
+  flex-basis: 100%;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.plan__problem {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.87rem;
   color: var(--warning);
-  border: 1px dashed currentColor;
-  border-radius: 4px;
+  background: rgba(224, 163, 62, 0.08);
+  border-left: 3px solid var(--warning);
+  border-radius: 0 6px 6px 0;
 }

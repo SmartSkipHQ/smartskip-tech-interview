@@ -36,7 +36,7 @@ onMounted(load)
       </div>
 
       <span
-        v-if="result"
+        v-if="result?.advice"
         class="verdict"
         :class="`verdict--${result.advice.verdict}`"
       >
@@ -48,22 +48,29 @@ onMounted(load)
     <p v-else-if="error" class="plan__state plan__state--error">{{ error }}</p>
 
     <template v-else-if="result">
-      <div class="weather">
-        <span class="weather__summary">{{ result.forecast.summary }}</span>
-        <span class="weather__stat">{{ Math.round(result.forecast.highC) }}° /
-          {{ Math.round(result.forecast.lowC) }}°</span>
-        <span class="weather__stat">{{ result.forecast.chanceOfRainPct }}% rain</span>
-        <span class="weather__stat">{{ Math.round(result.forecast.windKph) }} km/h wind</span>
-        <span v-if="result.forecast.source === 'sample'" class="chip" title="Not a real forecast">
-          sample
-        </span>
-      </div>
-
-      <p class="plan__advice">{{ result.advice.reason }}</p>
-
-      <p v-if="result.advice.suggestedDate" class="plan__suggestion">
-        Better on {{ dayLabel(result.advice.suggestedDate) }}.
+      <p v-if="result.problem" class="plan__problem">
+        No forecast. {{ result.problem.detail }}
       </p>
+
+      <template v-else-if="result.forecast">
+        <div class="weather">
+          <span class="weather__summary">{{ result.forecast.summary }}</span>
+          <span class="weather__stat">
+            {{ Math.round(result.forecast.highC) }}° / {{ Math.round(result.forecast.lowC) }}°
+          </span>
+          <span class="weather__stat">{{ result.forecast.chanceOfRainPct }}% rain</span>
+          <span class="weather__stat">
+            {{ Math.round(result.forecast.windKph) }} km/h wind
+          </span>
+          <span class="weather__where">{{ result.forecast.resolvedLocation }}</span>
+        </div>
+
+        <p v-if="result.advice" class="plan__advice">{{ result.advice.reason }}</p>
+
+        <p v-if="result.advice?.suggestedDate" class="plan__suggestion">
+          Better on {{ dayLabel(result.advice.suggestedDate) }}.
+        </p>
+      </template>
 
       <p v-if="plan.notes" class="plan__notes">{{ plan.notes }}</p>
     </template>

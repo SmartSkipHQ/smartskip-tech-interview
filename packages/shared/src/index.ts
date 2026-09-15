@@ -28,7 +28,8 @@ export type UpdatePlanInput = Partial<CreatePlanInput>
 
 /** Weather for one city on one day, normalised so the UI stays provider-agnostic. */
 export interface Forecast {
-  city: string
+  /** What the provider actually matched, e.g. "Phoenix, Arizona, US". */
+  resolvedLocation: string
   date: string
   highC: number
   lowC: number
@@ -37,9 +38,10 @@ export interface Forecast {
   windKph: number
   /** Short label, e.g. "Heavy rain". */
   summary: string
-  /** Where the numbers came from. Sample data is not real weather. */
-  source: 'sample' | 'open-meteo'
 }
+
+/** Why there is no forecast. Each one needs a different answer in the UI. */
+export type ForecastProblem = 'city_not_found' | 'out_of_range' | 'upstream_error'
 
 export type Verdict = 'go' | 'maybe' | 'reschedule'
 
@@ -55,11 +57,18 @@ export interface Advice {
   source: 'mock' | 'anthropic'
 }
 
-/** What the UI needs to draw one card. */
+/**
+ * What the UI needs to draw one card. A plan with no forecast is a normal
+ * outcome, not an error, so `problem` explains it instead of throwing.
+ */
 export interface PlanAdvice {
   plan: Plan
-  forecast: Forecast
-  advice: Advice
+  forecast: Forecast | null
+  advice: Advice | null
+  problem?: {
+    reason: ForecastProblem
+    detail: string
+  }
 }
 
 export interface ApiError {

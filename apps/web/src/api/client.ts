@@ -1,9 +1,4 @@
-import type {
-  CreatePlanInput,
-  Plan,
-  PlanAdvice,
-  UpdatePlanInput,
-} from '@smartskip/shared'
+import type { CreatePlanInput, Plan, PlanAdvice } from '@smartskip/shared'
 
 export class ApiError extends Error {
   constructor(
@@ -44,17 +39,9 @@ export const api = {
     return Promise.reject(new Error('createPlan is not implemented yet'))
   },
 
-  /** TODO(candidate): PATCH /plans/:id */
-  updatePlan(_id: string, _patch: UpdatePlanInput): Promise<Plan> {
-    return Promise.reject(new Error('updatePlan is not implemented yet'))
-  },
-
-  /** TODO(candidate): DELETE /plans/:id */
-  deletePlan(_id: string): Promise<void> {
-    return Promise.reject(new Error('deletePlan is not implemented yet'))
-  },
-
-  getAdvice(planId: string): Promise<PlanAdvice> {
-    return request<PlanAdvice>(`/plans/${planId}/advice`)
+  /** `provider` overrides the server default, for comparing implementations. */
+  getAdvice(planId: string, provider?: 'mock' | 'anthropic'): Promise<PlanAdvice> {
+    const query = provider ? `?provider=${provider}` : ''
+    return request<PlanAdvice>(`/plans/${planId}/advice${query}`)
   },
 }

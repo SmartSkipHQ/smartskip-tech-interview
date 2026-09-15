@@ -9,9 +9,23 @@ function inDays(days: number): string {
 
 const now = new Date().toISOString()
 
+/**
+ * The last two plans are here on purpose. "Lakeview East" is a Chicago
+ * neighbourhood, not a city, and no geocoder will place it; the marathon is
+ * past the sixteen days any forecast covers. Every candidate meets the same
+ * two, whatever they end up writing.
+ */
 export const seedPlans: Plan[] = [
   {
     id: 'plan_01',
+    title: '10k training run',
+    city: 'Seattle, WA',
+    date: inDays(1),
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: 'plan_02',
     title: 'Backyard barbecue',
     city: 'Phoenix, AZ',
     date: inDays(2),
@@ -20,19 +34,11 @@ export const seedPlans: Plan[] = [
     updatedAt: now,
   },
   {
-    id: 'plan_02',
+    id: 'plan_03',
     title: 'Moving apartments',
     city: 'Denver, CO',
     date: inDays(3),
     notes: 'Rented van, booked for the whole day.',
-    createdAt: now,
-    updatedAt: now,
-  },
-  {
-    id: 'plan_03',
-    title: '10k training run',
-    city: 'Seattle, WA',
-    date: inDays(1),
     createdAt: now,
     updatedAt: now,
   },
@@ -50,6 +56,24 @@ export const seedPlans: Plan[] = [
     title: 'Beach day',
     city: 'Miami, FL',
     date: inDays(5),
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: 'plan_06',
+    title: 'Rooftop drinks',
+    city: 'Lakeview East',
+    date: inDays(3),
+    notes: 'Typed the neighbourhood instead of the city.',
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: 'plan_07',
+    title: 'Marathon',
+    city: 'Boston, MA',
+    date: inDays(40),
+    notes: 'Booked months ago.',
     createdAt: now,
     updatedAt: now,
   },
