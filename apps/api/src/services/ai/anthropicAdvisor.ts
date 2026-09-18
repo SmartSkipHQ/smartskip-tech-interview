@@ -10,7 +10,7 @@ import type { AdviceContext, Advisor } from './types'
  *   import Anthropic from '@anthropic-ai/sdk'
  *   const client = new Anthropic()
  *   const response = await client.messages.create({
- *     model: process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-5',
+ *     model: process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-5',
  *     max_tokens: 512,
  *     system: '...',
  *     messages: [{ role: 'user', content: '...' }],
